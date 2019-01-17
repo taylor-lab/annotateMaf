@@ -1,0 +1,28 @@
+Package: annotatemaf
+Title: Functional Annotation of Variants in a MAF File
+Version: 1.0
+Authors@R: 
+    person(given = "Philip",
+           family = "Jonsson",
+           role = c("aut", "cre"),
+           email = "philip.jonsson@gmail.com")
+Description: Functions to add variant-level annotation to a MAF file.
+            Currently supports variant annotation from BRCA Exchange, OncoKB and Taylor lab hotspot mutations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+Depends:
+    R (>= 2.10)
+Imports:
+    dplyr,
+    furrr,
+    future,
+    httr,
+    jsonlite,
+    plyr,
+    purrr,
+    readr,
+    reticulate,
+    tidyr,
+    data.table
