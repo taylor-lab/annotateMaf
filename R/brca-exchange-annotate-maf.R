@@ -16,7 +16,7 @@
 #' @source \url{https://brcaexchange.org}
 #'
 #' @import dplyr
-#' @importFrom purrr map_dfr
+#' @importFrom purrr map_dfr map_chr possibly
 #' @importFrom reticulate source_python
 #' 
 #' @examples
@@ -82,10 +82,12 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
 #' @rdname brca_exchange_annotate_maf
 brca_annotate_maf = function(maf) {
 
+    map_chr_possibly = possibly(map_chr, NA_character_)
+    
     mutate(maf, annot = pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2),
                              query_brca_exchange)) %>% 
-        mutate(brca_exchange_id = map(annot, 'brca_exchange_id'),
-               brca_exchange_enigma = map(annot, 'brca_exchange_enigma'),
-               brca_exchange_clinvar = map(annot, 'brca_exchange_clinvar')) %>% 
+        mutate(brca_exchange_id = map_chr_possibly(annot, 'brca_exchange_id'),
+               brca_exchange_enigma = map_chr_possibly(annot, 'brca_exchange_enigma'),
+               brca_exchange_clinvar = map_chr_possibly(annot, 'brca_exchange_clinvar')) %>% 
         select(-annot) 
 }
