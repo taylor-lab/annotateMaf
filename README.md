@@ -1,4 +1,4 @@
-# annotateMAaf
+# annotateMaf
 
 A set of functions to add variant annotation to a MAF file.
 Sources currently include OncoKB, BRCA Exchange and somatic hotspots from the Taylor Lab.
