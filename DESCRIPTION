@@ -1,4 +1,4 @@
-Package: annotatemaf
+Package: annotateMaf
 Title: Functional Annotation of Variants in a MAF File
 Version: 1.0
 Authors@R: 

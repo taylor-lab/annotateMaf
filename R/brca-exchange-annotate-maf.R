@@ -1,6 +1,7 @@
 #' Annotate BRCA1/2 variants
 #'
 #' Adds functional BRCA1 and BRCA2 variant annotation, using BRCA Exchange API (see URL). Annotation comes from ENIGMA and ClinVar.
+#' Not that variant alleles in a MAF are in the column \code{Tumor_Seq_Allele2} by default.
 #'
 #' @param maf Input MAF.
 #' 
@@ -24,8 +25,7 @@
 #' @name brca_exchange_annotate_maf
 NULL
 
-# reticulate::source_python('inst/python/brca-exchange-query.py')
-source_python(system.file('python', 'brca-exchange-query.py', package = 'annotatemaf'))
+source_python(system.file('python', 'brca-exchange-query.py', package = 'annotateMaf'))
 
 #' @export
 #' @rdname brca_exchange_annotate_maf
@@ -81,9 +81,11 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
 #' @export
 #' @rdname brca_exchange_annotate_maf
 brca_annotate_maf = function(maf) {
-    plan(multicore)
-    
-    mutate(maf, annot = pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Alternate_Allele),
+
+    mutate(maf, annot = pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2),
                              query_brca_exchange)) %>% 
-        unnest(annot)
+        mutate(brca_exchange_id = map(annot, 'brca_exchange_id'),
+               brca_exchange_enigma = map(annot, 'brca_exchange_enigma'),
+               brca_exchange_clinvar = map(annot, 'brca_exchange_clinvar')) %>% 
+        select(-annot) 
 }

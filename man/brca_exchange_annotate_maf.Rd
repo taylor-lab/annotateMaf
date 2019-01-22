@@ -31,6 +31,7 @@ Annotated MAF with columns \code{brca_exchange_enigma}, \code{brca_exchange_clin
 }
 \description{
 Adds functional BRCA1 and BRCA2 variant annotation, using BRCA Exchange API (see URL). Annotation comes from ENIGMA and ClinVar.
+Not that variant alleles in a MAF are in the column \code{Tumor_Seq_Allele2} by default.
 }
 \examples{
 \donttest{query_brca_exchange('BRCA1', 41276045, 41276046, 'CT', '-')}
