@@ -25,8 +25,6 @@
 #' @name brca_exchange_annotate_maf
 NULL
 
-source_python(system.file('python', 'brca-exchange-query.py', package = 'annotateMaf'))
-
 #' @export
 #' @rdname brca_exchange_annotate_maf
 query_brca_exchange = function(gene, start, end, ref, alt) {
@@ -83,11 +81,11 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
 brca_annotate_maf = function(maf) {
 
     map_chr_possibly = possibly(map_chr, NA_character_)
-    
+
     mutate(maf, annot = pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2),
-                             query_brca_exchange)) %>% 
+                             query_brca_exchange)) %>%
         mutate(brca_exchange_id = map_chr_possibly(annot, 'brca_exchange_id'),
                brca_exchange_enigma = map_chr_possibly(annot, 'brca_exchange_enigma'),
-               brca_exchange_clinvar = map_chr_possibly(annot, 'brca_exchange_clinvar')) %>% 
-        select(-annot) 
+               brca_exchange_clinvar = map_chr_possibly(annot, 'brca_exchange_clinvar')) %>%
+        select(-annot)
 }

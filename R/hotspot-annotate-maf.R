@@ -31,7 +31,7 @@ hotspot_annotate_maf = function(maf, hotspots = NULL)
     # Read default hotspot lists if user does not supply
     gene_annotation = load_gene_annotation()
 
-    if (is.null(hotspots)) hotspots = hotspots
+    if (is.null(hotspots)) hotspots = annotateMaf::hotspots
 
     # Function that deals with indel hotspots
     tag_indel_hotspot = function(gene, hgvsp_short, start, end, indel_length) {
