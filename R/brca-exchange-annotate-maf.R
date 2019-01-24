@@ -32,46 +32,51 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
     if (end < start) stop('End position cannot be smaller than start position.', call. = F)
     
     if (gene %in% c('BRCA1', 'BRCA2')) {
-        brca_query(gene, start-1, end+1) %>%
-            map_dfr(., ~set_names(., c('gene',
-                                       'chrom',
-                                       'start_position',
-                                       'end_position',
-                                       'reference_allele',
-                                       'alternate_allele',
-                                       'id',
-                                       'pathogenicity'))) %>% 
-            dplyr::mutate(
-                start_position = as.numeric(start_position),
-                end_position = as.numeric(end_position),
-                variant_type = case_when(
-                    str_sub(reference_allele, 1, 1) == str_sub(alternate_allele, 1, 1) &
-                        nchar(reference_allele) < nchar(alternate_allele) ~ 'insertion',
-                    str_sub(reference_allele, 1, 1) == str_sub(alternate_allele, 1, 1) &
-                        nchar(reference_allele) > nchar(alternate_allele) ~ 'deletion',
-                    TRUE ~ 'snv'),
-                reference_allele = case_when(
-                    variant_type == 'insertion' ~ '-',
-                    variant_type == 'deletion' ~ str_replace(reference_allele, '(^[A-Z]{1})', ''),
-                    TRUE ~ reference_allele
-                ),
-                alternate_allele = case_when(
-                    variant_type == 'insertion' ~ str_replace(alternate_allele, '(^[A-Z]{1})', ''), 
-                    variant_type == 'deletion' ~ '-',
-                    TRUE ~ alternate_allele
-                ),
-                end_position = case_when(
-                    variant_type == 'snv' ~ start_position,
-                    variant_type == 'insertion' ~ end_position + 1,
-                    variant_type == 'deletion' ~ end_position),
-                start_position = case_when(
-                    variant_type == 'deletion' ~ start_position + 1,
-                    TRUE ~ start_position)
-            ) %>% 
-            dplyr::filter(start_position == start, end_position == end, reference_allele == ref, alternate_allele == alt) %>% 
-            mutate(brca_exchange_enigma = str_trim(str_extract(pathogenicity, '[A-Za-z\\,\\ ]+(?=\\(ENIGMA\\))'), 'both'),
-                   brca_exchange_clinvar = str_trim(str_extract(pathogenicity, '[A-Za-z\\,\\ \\_]+(?=\\(ClinVar\\))'), 'both')) %>%
-            select(brca_exchange_id = id, brca_exchange_enigma, brca_exchange_clinvar)
+        qq = brca_query(gene, start-1, end+1) 
+        
+        if (length(qq) > 0) {
+            map_dfr(qq, ~set_names(., c('gene',
+                                        'chrom',
+                                        'start_position',
+                                        'end_position',
+                                        'reference_allele',
+                                        'alternate_allele',
+                                        'id',
+                                        'pathogenicity'))) %>% 
+                dplyr::mutate(
+                    start_position = as.numeric(start_position),
+                    end_position = as.numeric(end_position),
+                    variant_type = case_when(
+                        str_sub(reference_allele, 1, 1) == str_sub(alternate_allele, 1, 1) &
+                            nchar(reference_allele) < nchar(alternate_allele) ~ 'insertion',
+                        str_sub(reference_allele, 1, 1) == str_sub(alternate_allele, 1, 1) &
+                            nchar(reference_allele) > nchar(alternate_allele) ~ 'deletion',
+                        TRUE ~ 'snv'),
+                    reference_allele = case_when(
+                        variant_type == 'insertion' ~ '-',
+                        variant_type == 'deletion' ~ str_replace(reference_allele, '(^[A-Z]{1})', ''),
+                        TRUE ~ reference_allele
+                    ),
+                    alternate_allele = case_when(
+                        variant_type == 'insertion' ~ str_replace(alternate_allele, '(^[A-Z]{1})', ''), 
+                        variant_type == 'deletion' ~ '-',
+                        TRUE ~ alternate_allele
+                    ),
+                    end_position = case_when(
+                        variant_type == 'snv' ~ start_position,
+                        variant_type == 'insertion' ~ end_position + 1,
+                        variant_type == 'deletion' ~ end_position),
+                    start_position = case_when(
+                        variant_type == 'deletion' ~ start_position + 1,
+                        TRUE ~ start_position)
+                ) %>% 
+                dplyr::filter(start_position == start, end_position == end, reference_allele == ref, alternate_allele == alt) %>% 
+                mutate(brca_exchange_enigma = str_trim(str_extract(pathogenicity, '[A-Za-z\\,\\ ]+(?=\\(ENIGMA\\))'), 'both'),
+                       brca_exchange_clinvar = str_trim(str_extract(pathogenicity, '[A-Za-z\\,\\ \\_]+(?=\\(ClinVar\\))'), 'both')) %>%
+                select(brca_exchange_id = id, brca_exchange_enigma, brca_exchange_clinvar)
+        } else {
+            tibble(brca_exchange_id = NA)
+        }
     }
 }
 

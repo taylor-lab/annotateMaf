@@ -16,7 +16,7 @@ annotCols = ['id', 'Pathogenicity_all']
 def brca_query(gene, start_pos, end_pos):
     
     query = httpClient.search_variants(reference_name = chrom[gene], variant_set_id = "brca-hg37",
-                                        start = int(start_pos), end = int(end_pos)+1) 
+                                        start = int(start_pos), end = int(end_pos)) 
 
     listOutput = []
     for var in query:
