@@ -4,12 +4,12 @@
 \alias{hotspot_annotate_maf}
 \title{Annotate somatic hotspot mutations}
 \usage{
-hotspot_annotate_maf(maf, hotspots = NULL)
+hotspot_annotate_maf(maf, hotspot_tbl = NULL)
 }
 \arguments{
 \item{maf}{Input MAF.}
 
-\item{hotspots}{Custom list of hotspots.}
+\item{hotspot_tbl}{Custom table of hotspots.}
 }
 \value{
 Annotated MAF with columns \code{snv_hotspot}, \code{threeD_hotspot}, \code{indel_hotspot_type} and \code{Hotspot} indicating types of hotspots. Note that the \code{Hotspot} column does not includes 3D hotspots.

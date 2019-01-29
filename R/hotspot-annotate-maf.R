@@ -3,7 +3,7 @@
 #' Adds hotspot annotation to VEP-annotated MAF. Sources of default hotspots below.
 #'
 #' @param maf Input MAF.
-#' @param hotspots Custom list of hotspots.
+#' @param hotspot_tbl Custom table of hotspots.
 #'
 #' @return Annotated MAF with columns \code{snv_hotspot}, \code{threeD_hotspot}, \code{indel_hotspot_type} and \code{Hotspot} indicating types of hotspots. Note that the \code{Hotspot} column does not includes 3D hotspots.
 #'
@@ -22,16 +22,22 @@ load_gene_annotation = function() {
 
 #' @export
 #' @rdname hotspot_annotate_maf
-hotspot_annotate_maf = function(maf, hotspots = NULL)
+hotspot_annotate_maf = function(maf, hotspot_tbl = NULL)
 {
     if (!inherits(maf, 'data.frame')) stop('Input MAF must be a data frame, preferrable VEP annotated')
-    if (!is.null(hotspots) & !file.exists(hotspots)) stop('Hotspots file does not exist')
-    if (any(grepl('hotspot', tolower(names(hotspots))))) message('Hotspot columns in MAF might be overwritten, check names')
-
+    if (!is.null(hotspot_tbl)) {
+        if (!file.exists(hotspot_tbl)) {
+            stop('Hotspots file does not exist', call. = F)
+        } else {
+            hotspots = hotspot_tbl
+        }
+    } else {
+        hotspots = annotateMaf::hotspots
+    }
+    if (any(grepl('hotspot', tolower(names(maf))))) message('Hotspot columns in MAF might be overwritten, check names')
+    
     # Read default hotspot lists if user does not supply
     gene_annotation = load_gene_annotation()
-
-    if (is.null(hotspots)) hotspots = annotateMaf::hotspots
 
     # Function that deals with indel hotspots
     tag_indel_hotspot = function(gene, hgvsp_short, start, end, indel_length) {
@@ -43,7 +49,7 @@ hotspot_annotate_maf = function(maf, hotspots = NULL)
             discard(. == '')
         start_res = as.numeric(str_extract(gene_hotspots, '[0-9]+(?=_)'))
         end_res = as.numeric(str_extract(gene_hotspots, '(?<=_[A-Z]{1})[0-9]+'))
-        longest_variant = max(end_res-start_res, na.rm = T)
+        longest_variant = max(end_res - start_res, na.rm = T)
         indel_hs = filter(hotspots, Gene == gene, indel_hotspot == T) %>% # checks if overlap with hotspot intervals
             filter(Start-1 <= (start+2) & End >= (end-2) & indel_length <= (longest_variant+1)) # allow for wiggle room in both directions but not too long indel
         if (nrow(indel_hs) > 0 | str_replace(hgvsp_short, 'p.', '') %in% gene_hotspots) {

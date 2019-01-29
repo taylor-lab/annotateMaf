@@ -4,7 +4,6 @@ from ga4gh.client import client
 from itertools import chain
 requests.packages.urllib3.disable_warnings()
 
-
 httpClient = client.HttpClient("https://brcaexchange.org/backend/data/ga4gh/v0.6.0a7/")
 chrom = {
     "BRCA1": "chr17",
