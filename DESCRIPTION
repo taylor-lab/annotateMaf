@@ -26,3 +26,5 @@ Imports:
     reticulate,
     tidyr,
     data.table
+Suggests: 
+    testthat
