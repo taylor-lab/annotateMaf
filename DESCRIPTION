@@ -27,4 +27,5 @@ Imports:
     tidyr,
     data.table
 Suggests: 
-    testthat
+    testthat,
+    covr

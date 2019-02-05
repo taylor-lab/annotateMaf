@@ -1,6 +1,10 @@
 language: r
 sudo: false
 cache: packages
+latex: false
+
+before_install:
+    - pip install urllib3 ga4gh
 
 warnings_are_errors: true
 
@@ -8,3 +12,6 @@ notifications:
     email:
     on_success: change
     on_failure: always
+
+after_success:
+    - Rscript -e 'covr::codecov()'

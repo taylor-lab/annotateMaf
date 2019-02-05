@@ -1,5 +1,6 @@
 # annotateMaf
 [![Build Status](https://travis-ci.org/taylor-lab/annotateMaf.svg?branch=master)](https://travis-ci.org/taylor-lab/annotateMaf)
+[![Coverage status](https://codecov.io/gh/taylor-lab/annotateMaf/branch/master/graph/badge.svg)](https://codecov.io/github/taylor-lab/annotateMaf?branch=master)
 
 A set of functions to add variant annotation to a MAF file.
 Sources currently include OncoKB, BRCA Exchange and somatic hotspots from the Taylor Lab.
