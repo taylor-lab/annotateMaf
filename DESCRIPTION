@@ -25,7 +25,8 @@ Imports:
     readr,
     reticulate,
     tidyr,
-    data.table
+    data.table,
+    stringr
 Suggests: 
     testthat,
     covr

@@ -22,6 +22,7 @@
 #' @importFrom furrr future_pmap_dfr
 #' @importFrom plyr revalue
 #' @importFrom httr modify_url GET content
+#' @importFrom stringr str_replace str_extract
 #' 
 #' @examples
 #' query_oncokb('PIK3CA', 'H1047R', 'missense')
@@ -115,15 +116,15 @@ oncokb_annotate_maf = function(maf, cancer_types = NULL)
 
     oncokb_cols = mutate(maf,
            gene = Hugo_Symbol,
-           protein_change = str_replace(HGVSp_Short, 'p.', ''),
+           protein_change = stringr::str_replace(HGVSp_Short, 'p.', ''),
            variant_type = case_when(
                (Variant_Classification %in% coding_mutations & HGVSp_Short != '') | # this is necessary to avoid poorly annotated but likely FP indel calls from Pindel
                (Variant_Classification == 'Splice_Site' & HGVSc != '') |
                 Hugo_Symbol == 'TERT' ~
                    revalue(Variant_Classification, consequence_map, warn_missing = F),
              TRUE ~ ''),
-           start = str_extract(Protein_position, '^[0-9]+(?=\\/|\\-)'),
-           end = str_extract(Protein_position, '(?<=-)[0-9]+(?=/)')
+           start = stringr::str_extract(Protein_position, '^[0-9]+(?=\\/|\\-)'),
+           end = stringr::str_extract(Protein_position, '(?<=-)[0-9]+(?=/)')
            ) %>%
         select(gene, protein_change, variant_type, start, end, cancer_type) %>%
         future_pmap_dfr(., query_oncokb)
