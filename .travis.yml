@@ -4,7 +4,7 @@ cache: packages
 latex: false
 
 before_install:
-    - pip install urllib3 ga4gh
+    - pip install urllib3 ga4gh --user
 
 warnings_are_errors: true
 
