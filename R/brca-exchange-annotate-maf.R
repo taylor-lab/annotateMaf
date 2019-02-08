@@ -32,7 +32,7 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
     if (end < start) stop('End position cannot be smaller than start position.', call. = F)
     
     if (gene %in% c('BRCA1', 'BRCA2')) {
-        qq = brca_query(gene, start-1, end+1) 
+        qq = brca_query(gene, start - 1, end + 1) 
         
         if (length(qq) > 0) {
             map_dfr(qq, ~set_names(., c('gene',
@@ -70,9 +70,14 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
                         variant_type == 'deletion' ~ start_position + 1,
                         TRUE ~ start_position)
                 ) %>% 
-                dplyr::filter(start_position == start, end_position == end, reference_allele == ref, alternate_allele == alt) %>% 
-                mutate(brca_exchange_enigma = str_trim(str_extract(pathogenicity, '[A-Za-z\\,\\ ]+(?=\\(ENIGMA\\))'), 'both'),
-                       brca_exchange_clinvar = str_trim(str_extract(pathogenicity, '[A-Za-z\\,\\ \\_]+(?=\\(ClinVar\\))'), 'both')) %>%
+                dplyr::filter(start_position == start,
+                              end_position == end,
+                              reference_allele == ref,
+                              alternate_allele == alt) %>% 
+                mutate(brca_exchange_enigma = str_trim(str_extract(
+                    pathogenicity, '[A-Za-z\\,\\ ]+(?=\\(ENIGMA\\))'), 'both'),
+                       brca_exchange_clinvar = str_trim(str_extract(
+                           pathogenicity, '[A-Za-z\\,\\ \\_]+(?=\\(ClinVar\\))'), 'both')) %>%
                 select(brca_exchange_id = id, brca_exchange_enigma, brca_exchange_clinvar)
         } else {
             tibble(brca_exchange_id = NA)

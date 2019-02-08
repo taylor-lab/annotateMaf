@@ -22,8 +22,8 @@ load_gene_annotation = function() {
 
 #' @export
 #' @rdname hotspot_annotate_maf
-hotspot_annotate_maf = function(maf, hotspot_tbl = NULL)
-{
+hotspot_annotate_maf = function(maf, hotspot_tbl = NULL) {
+    
     if (!inherits(maf, 'data.frame')) stop('Input MAF must be a data frame, preferrable VEP annotated')
     if (!is.null(hotspot_tbl)) {
         if (!file.exists(hotspot_tbl)) {
@@ -51,7 +51,7 @@ hotspot_annotate_maf = function(maf, hotspot_tbl = NULL)
         end_res = as.numeric(str_extract(gene_hotspots, '(?<=_[A-Z]{1})[0-9]+'))
         longest_variant = max(end_res - start_res, na.rm = T)
         indel_hs = filter(hotspots, Gene == gene, indel_hotspot == T) %>% # checks if overlap with hotspot intervals
-            filter(Start-1 <= (start+2) & End >= (end-2) & indel_length <= (longest_variant+1)) # allow for wiggle room in both directions but not too long indel
+            filter(Start - 1 <= (start + 2) & End >= (end - 2) & indel_length <= (longest_variant + 1)) # allow for wiggle room in both directions but not too long indel
         if (nrow(indel_hs) > 0 | str_replace(hgvsp_short, 'p.', '') %in% gene_hotspots) {
             is_hotspot = 'prior'
         } else if (end - start <= 5) { # if short hotspot overlapping known hotspot
@@ -67,7 +67,7 @@ hotspot_annotate_maf = function(maf, hotspot_tbl = NULL)
         gene_hotspots = filter(hotspots, Gene == gene, snv_hotspot == T) %>% # checks if previously identified
             select(tag, previous_mutations) %>%
             mutate(previous_mutations = map(previous_mutations, ~unlist(str_split(., ','))))
-        if(type == 'SNP' & trunc == F) {
+        if (type == 'SNP' & trunc == F) {
             is_hotspot = str_c(gene, start) %in% gene_hotspots$tag
         } else if (type == 'SNP' & trunc == T) {
             is_hotspot = str_c(gene, start) %in% gene_hotspots$tag &

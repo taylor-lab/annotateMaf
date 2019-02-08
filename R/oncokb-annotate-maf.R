@@ -1,6 +1,6 @@
 #' Annotate OncoKB levels of evidence
 #'
-#' Adds OncoKB oncogenicity and actionatility annotation to VEP-annotated MAF. See URLs below.
+#' Adds OncoKB oncogenicity and actionability annotation to VEP-annotated MAF. See URLs below.
 #'
 #' @param maf Input MAF.
 #' @param cancer_types Data frame with samples mapped to cancer type for accurate levels of actionability.
@@ -30,18 +30,18 @@
 #' @name oncokb_annotate_maf
 NULL
 
-consequence_map = c('3\'Flank'= 'any',
-                    '5\'Flank '= 'any',
+consequence_map = c('3\'Flank' = 'any',
+                    '5\'Flank ' = 'any',
                     # 'Targeted_Region'= 'inframe_deletion', 'inframe_insertion',
-                    'Frame_Shift_Del'= 'frameshift_variant',
-                    'Frame_Shift_Ins'= 'frameshift_variant',
-                    'In_Frame_Del'= 'inframe_deletion',
-                    'In_Frame_Ins'= 'inframe_insertion',
-                    'Missense_Mutation'= 'missense_variant',
-                    'Nonsense_Mutation'= 'stop_gained',
-                    'Nonstop_Mutation'= 'stop_lost',
-                    'Splice_Site'= 'splice_region_variant',
-                    'Translation_Start_Site'= 'start_lost')
+                    'Frame_Shift_Del' = 'frameshift_variant',
+                    'Frame_Shift_Ins' = 'frameshift_variant',
+                    'In_Frame_Del' = 'inframe_deletion',
+                    'In_Frame_Ins' = 'inframe_insertion',
+                    'Missense_Mutation' = 'missense_variant',
+                    'Nonsense_Mutation' = 'stop_gained',
+                    'Nonstop_Mutation' = 'stop_lost',
+                    'Splice_Site' = 'splice_region_variant',
+                    'Translation_Start_Site' = 'start_lost')
 
 coding_mutations = c('Frame_Shift_Del',
                      'Frame_Shift_Ins',
@@ -98,7 +98,9 @@ query_oncokb = function(gene, protein_change, variant_type, start, end, cancer_t
            oncokb_drugs = ifelse(length(drugs) == 0, '',
                                  paste(unlist(unique(drugs)), collapse = ',')),
            oncokb_version = oncokb_version)
-  } else { tibble(oncogenic = '') }
+  } else {
+      tibble(oncogenic = '')
+  }
 }
 
 #' @export

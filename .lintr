@@ -1,0 +1,9 @@
+linters:
+    with_defaults(
+        line_length_linter(120),
+        assignment_linter = NULL,
+        single_quotes_linter = NULL
+        )
+exclusions:
+    list('tests/testthat.R',
+         'R/hotspots.R')
