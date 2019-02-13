@@ -8,6 +8,7 @@ Authors@R:
            email = "philip.jonsson@gmail.com")
 Description: Functions to add variant-level annotation to a MAF file.
             Currently supports variant annotation from BRCA Exchange, OncoKB and Taylor lab hotspot mutations.
+URL: https://github.com/taylor-lab/annotateMaf
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

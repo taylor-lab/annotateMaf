@@ -36,7 +36,7 @@ oncokb_annotate_maf(maf, cancer_types = NULL)
 Annotated MAF with columns indicating functionality of mutation and levels of actionability.
 }
 \description{
-Adds OncoKB oncogenicity and actionatility annotation to VEP-annotated MAF. See URLs below.
+Adds OncoKB oncogenicity and actionability annotation to VEP-annotated MAF. See URLs below.
 }
 \examples{
 query_oncokb('PIK3CA', 'H1047R', 'missense')
