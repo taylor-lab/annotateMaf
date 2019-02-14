@@ -9,7 +9,7 @@ before_install:
 r_github_packages:
   - jimhester/lintr
 
-warnings_are_errors: true
+warnings_are_errors: false
 
 notifications:
     email:

@@ -6,17 +6,18 @@
 #' @param maf Input MAF.
 #' 
 #' @param gene Query gene.
-#' @param start Variant start position.
-#' @param end Variant end position.
+#' @param start Variant start position, in hg19.
+#' @param end Variant end position, in hg19.
 #' @param ref Reference allele.
 #' @param alt Alternate allele.
+#' @param use_api If \code{TRUE} uses BRCA exchange API, otherwise static table.
 #' 
 #' @return Annotated MAF with columns \code{brca_exchange_enigma}, \code{brca_exchange_clinvar} variant annotation from ENIGMA and ClinVar, respectively, and \code{brca_exchange_id} indicating database variant ID.
 #' 
 #' @source \url{https://brcaexchange.org}
 #'
-#' @import dplyr
-#' @importFrom purrr map_dfr map_chr possibly
+#' @import dplyr filter mutate select tibble
+#' @importFrom purrr map_dfr map_chr possibly transpose
 #' @importFrom reticulate source_python
 #' 
 #' @examples
@@ -27,12 +28,19 @@ NULL
 
 #' @export
 #' @rdname brca_exchange_annotate_maf
-query_brca_exchange = function(gene, start, end, ref, alt) {
+query_brca_exchange = function(gene, start, end, ref, alt, use_api = FALSE) {
     
     if (end < start) stop('End position cannot be smaller than start position.', call. = F)
     
     if (gene %in% c('BRCA1', 'BRCA2')) {
-        qq = brca_query(gene, start - 1, end + 1) 
+        
+        if (use_api == T) {
+            qq = brca_query(gene, start - 1, end + 1)
+        } else {
+            chrom = ifelse(gene == 'BRCA1', 17, 13)
+            qq = filter(brca_exchange_variants, Chr == chrom, start - 1, end + 1) %>% 
+                transpose()
+        }
         
         if (length(qq) > 0) {
             map_dfr(qq, ~set_names(., c('gene',
@@ -43,7 +51,7 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
                                         'alternate_allele',
                                         'id',
                                         'pathogenicity'))) %>% 
-                dplyr::mutate(
+                mutate(
                     start_position = as.numeric(start_position),
                     end_position = as.numeric(end_position),
                     variant_type = case_when(
@@ -70,14 +78,14 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
                         variant_type == 'deletion' ~ start_position + 1,
                         TRUE ~ start_position)
                 ) %>% 
-                dplyr::filter(start_position == start,
-                              end_position == end,
-                              reference_allele == ref,
-                              alternate_allele == alt) %>% 
+                filter(start_position == start,
+                       end_position == end,
+                       reference_allele == ref,
+                       alternate_allele == alt) %>% 
                 mutate(brca_exchange_enigma = str_trim(str_extract(
                     pathogenicity, '[A-Za-z\\,\\ ]+(?=\\(ENIGMA\\))'), 'both'),
-                       brca_exchange_clinvar = str_trim(str_extract(
-                           pathogenicity, '[A-Za-z\\,\\ \\_]+(?=\\(ClinVar\\))'), 'both')) %>%
+                    brca_exchange_clinvar = str_trim(str_extract(
+                        pathogenicity, '[A-Za-z\\,\\ \\_]+(?=\\(ClinVar\\))'), 'both')) %>%
                 select(brca_exchange_id = id, brca_exchange_enigma, brca_exchange_clinvar)
         } else {
             tibble(brca_exchange_id = NA)
@@ -85,14 +93,13 @@ query_brca_exchange = function(gene, start, end, ref, alt) {
     }
 }
 
-
 #' @export
 #' @rdname brca_exchange_annotate_maf
-brca_annotate_maf = function(maf) {
-
+brca_annotate_maf = function(maf, use_api = FALSE) {
+    
     map_chr_possibly = possibly(map_chr, NA_character_)
-
-    mutate(maf, annot = pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2),
+    
+    mutate(maf, annot = pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2, use_api),
                              query_brca_exchange)) %>%
         mutate(brca_exchange_id = map_chr_possibly(annot, 'brca_exchange_id'),
                brca_exchange_enigma = map_chr_possibly(annot, 'brca_exchange_enigma'),
