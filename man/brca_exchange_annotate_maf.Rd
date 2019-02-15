@@ -9,20 +9,22 @@
 \url{https://brcaexchange.org}
 }
 \usage{
-query_brca_exchange(gene, start, end, ref, alt)
+query_brca_exchange(gene, start, end, ref, alt, use_api = FALSE)
 
-brca_annotate_maf(maf)
+brca_annotate_maf(maf, use_api = FALSE)
 }
 \arguments{
 \item{gene}{Query gene.}
 
-\item{start}{Variant start position.}
+\item{start}{Variant start position, in hg19.}
 
-\item{end}{Variant end position.}
+\item{end}{Variant end position, in hg19.}
 
 \item{ref}{Reference allele.}
 
 \item{alt}{Alternate allele.}
+
+\item{use_api}{If \code{TRUE} uses BRCA exchange API, otherwise static table.}
 
 \item{maf}{Input MAF.}
 }

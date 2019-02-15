@@ -1,5 +1,7 @@
 context('oncokb_annotate_maf')
-
+suppressPackageStartupMessages({
+    library(dplyr)
+})
 # test_that('warns if missing columns in input', {
 #     
 # })

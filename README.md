@@ -8,8 +8,11 @@ Sources currently include OncoKB, BRCA Exchange and somatic hotspots from the Ta
 
 ## Installation
 
-Load and install the library this way:
+~~This package python modules `urllib3` and `ga4gh`, the latter of which only works in python (< 3.0).~~\
+_2019-02-14: Disabled due to this [issue](https://github.com/BRCAChallenge/brca-exchange/issues/981). Instead of querying the API, we now use a static table._
+__
 
+Load and install the library this way:
 ``` r
 devtools::install_github('taylorlab/annotateMaf')
 library(annotateMaf)

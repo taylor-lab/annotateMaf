@@ -16,7 +16,7 @@
 #' 
 #' @source \url{https://brcaexchange.org}
 #'
-#' @import dplyr filter mutate select tibble
+#' @importFrom dplyr filter mutate select tibble
 #' @importFrom purrr map_dfr map_chr possibly transpose
 #' @importFrom reticulate source_python
 #' 
