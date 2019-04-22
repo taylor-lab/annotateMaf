@@ -13,7 +13,7 @@
 query_oncokb(gene, protein_change, variant_type, start, end,
   cancer_type = "CANCER")
 
-oncokb_annotate_maf(maf, cancer_types = NULL)
+oncokb_annotate_maf(maf, cancer_types = NULL, parallelize = TRUE)
 }
 \arguments{
 \item{gene}{Gene.}

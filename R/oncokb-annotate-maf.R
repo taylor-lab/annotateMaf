@@ -105,7 +105,7 @@ query_oncokb = function(gene, protein_change, variant_type, start, end, cancer_t
 
 #' @export
 #' @rdname oncokb_annotate_maf
-oncokb_annotate_maf = function(maf, cancer_types = NULL)
+oncokb_annotate_maf = function(maf, cancer_types = NULL, parallelize = TRUE)
 {
     if (is.null(cancer_types) & !'cancer_type' %in% names(maf)) {
         message('No cancer types(s) specified, defaults to CANCER')
@@ -128,9 +128,14 @@ oncokb_annotate_maf = function(maf, cancer_types = NULL)
            start = stringr::str_extract(Protein_position, '^[0-9]+(?=\\/|\\-)'),
            end = stringr::str_extract(Protein_position, '(?<=-)[0-9]+(?=/)')
            ) %>%
-        select(gene, protein_change, variant_type, start, end, cancer_type) %>%
-        future_pmap_dfr(., query_oncokb)
-
+        select(gene, protein_change, variant_type, start, end, cancer_type)
+    
+    if (parallelize) {
+        oncokb_cols = future_pmap_dfr(oncokb_cols, query_oncokb)
+    } else {
+        oncokb_cols = pmap_dfr(oncokb_cols, query_oncokb)
+    }
+        
     bind_cols(maf, oncokb_cols)
 
 }
