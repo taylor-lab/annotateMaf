@@ -13,7 +13,7 @@ _2019-02-14: Disabled due to this [issue](https://github.com/BRCAChallenge/brca-
 
 Load and install the library this way:
 ``` r
-devtools::install_github('taylorlab/annotateMaf')
+devtools::install_github('taylor-lab/annotateMaf')
 library(annotateMaf)
 ```
 
