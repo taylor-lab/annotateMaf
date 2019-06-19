@@ -18,6 +18,7 @@
 #' @source \url{github.com/oncokb/oncokb-annotator}
 #'
 #' @import purrr
+#' @importFrom dplyr case_when
 #' @importFrom future plan
 #' @importFrom furrr future_pmap_dfr
 #' @importFrom plyr revalue
@@ -119,7 +120,7 @@ oncokb_annotate_maf = function(maf, cancer_types = NULL, parallelize = TRUE)
     oncokb_cols = mutate(maf,
            gene = Hugo_Symbol,
            protein_change = stringr::str_replace(HGVSp_Short, 'p.', ''),
-           variant_type = case_when(
+           variant_type = dplyr::case_when(
                (Variant_Classification %in% coding_mutations & HGVSp_Short != '') | # this is necessary to avoid poorly annotated but likely FP indel calls from Pindel
                (Variant_Classification == 'Splice_Site' & HGVSc != '') |
                 Hugo_Symbol == 'TERT' ~
