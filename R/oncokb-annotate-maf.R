@@ -18,7 +18,7 @@
 #' @source \url{github.com/oncokb/oncokb-annotator}
 #'
 #' @import purrr
-#' @importFrom dplyr case_when
+#' @importFrom dplyr case_when bind_cols
 #' @importFrom future plan
 #' @importFrom furrr future_pmap_dfr
 #' @importFrom plyr revalue
