@@ -42,6 +42,7 @@ consequence_map = c('3\'Flank' = 'any',
                     'Nonsense_Mutation' = 'stop_gained',
                     'Nonstop_Mutation' = 'stop_lost',
                     'Splice_Site' = 'splice_region_variant',
+                    'Splice_Region' = 'splice_region_variant',
                     'Translation_Start_Site' = 'start_lost')
 
 coding_mutations = c('Frame_Shift_Del',
@@ -122,7 +123,7 @@ oncokb_annotate_maf = function(maf, cancer_types = NULL, parallelize = TRUE)
            protein_change = stringr::str_replace(HGVSp_Short, 'p.', ''),
            variant_type = dplyr::case_when(
                (Variant_Classification %in% coding_mutations & HGVSp_Short != '') | # this is necessary to avoid poorly annotated but likely FP indel calls from Pindel
-               (Variant_Classification == 'Splice_Site' & HGVSc != '') |
+               (Variant_Classification %in% c('Splice_Site', 'Splice_Region') & HGVSc != '') |
                 Hugo_Symbol == 'TERT' ~
                    revalue(Variant_Classification, consequence_map, warn_missing = F),
              TRUE ~ ''),
