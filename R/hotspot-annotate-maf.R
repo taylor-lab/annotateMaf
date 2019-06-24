@@ -7,7 +7,8 @@
 #'
 #' @return Annotated MAF with columns \code{snv_hotspot}, \code{threeD_hotspot}, \code{indel_hotspot_type} and \code{Hotspot} indicating types of hotspots. Note that the \code{Hotspot} column does not includes 3D hotspots.
 #'
-#' @importFrom dplyr mutate rowwise case_when
+#' @importFrom dplyr mutate rowwise case_when pull
+#' @importFrom purrr discard
 #' @importFrom tidyr replace_na
 #' @importFrom jsonlite fromJSON
 #' @importFrom readr read_lines
@@ -45,10 +46,10 @@ hotspot_annotate_maf = function(maf, hotspot_tbl = NULL) {
     tag_indel_hotspot = function(gene, hgvsp_short, start, end, indel_length) {
         is_hotspot = 'none'
         gene_hotspots = filter(hotspots, Gene == gene, indel_hotspot == T) %>% # checks if previously identified
-            pull(previous_mutations) %>%
+            dplyr::pull(previous_mutations) %>%
             str_split(',') %>%
             unlist() %>%
-            discard(. == '')
+            purrr::discard(. == '')
         start_res = as.numeric(str_extract(gene_hotspots, '[0-9]+(?=_)'))
         end_res = as.numeric(str_extract(gene_hotspots, '(?<=_[A-Z]{1})[0-9]+'))
         longest_variant = max(end_res - start_res, na.rm = T)
@@ -92,8 +93,8 @@ hotspot_annotate_maf = function(maf, hotspot_tbl = NULL) {
                  end_residue = str_extract(Protein_position, '(?<=-)[0-9]+(?=/)'),
                  end_residue = ifelse(is.na(end_residue) & Variant_Classification %like% 'In_Frame',
                                       start_residue, end_residue)) %>%
-        replace_na(list(start_residue = 0, end_residue = 0)) %>%
-        rowwise() %>%
+        tidyr::replace_na(list(start_residue = 0, end_residue = 0)) %>%
+        dplyr::rowwise() %>%
         mutate(
             start_residue = as.numeric(start_residue),
             end_residue = as.numeric(end_residue),
