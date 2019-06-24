@@ -7,10 +7,12 @@
 #'
 #' @return Annotated MAF with columns \code{snv_hotspot}, \code{threeD_hotspot}, \code{indel_hotspot_type} and \code{Hotspot} indicating types of hotspots. Note that the \code{Hotspot} column does not includes 3D hotspots.
 #'
+#' @importFrom dplyr mutate rowwise case_when
 #' @importFrom tidyr replace_na
 #' @importFrom jsonlite fromJSON
 #' @importFrom readr read_lines
 #' @importFrom data.table %like%
+#' @importFrom stringr str_c str_split str_extract str_replace
 #'
 #' @name hotspot_annotate_maf
 NULL
