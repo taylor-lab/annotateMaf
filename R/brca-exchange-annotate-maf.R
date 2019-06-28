@@ -16,9 +16,11 @@
 #' 
 #' @source \url{https://brcaexchange.org}
 #'
-#' @importFrom dplyr filter mutate select tibble
-#' @importFrom purrr map_dfr map_chr possibly transpose
+#' @importFrom dplyr filter mutate select tibble case_when
+#' @importFrom purrr map_dfr map_chr possibly transpose pmap set_names
 #' @importFrom reticulate source_python
+#' @importFrom stringr str_sub str_trim
+#' @importFrom tibble tibble
 #' 
 #' @examples
 #' \donttest{query_brca_exchange('BRCA1', 41276045, 41276046, 'CT', '-')}
@@ -34,61 +36,61 @@ query_brca_exchange = function(gene, start, end, ref, alt, use_api = FALSE) {
     
     if (gene %in% c('BRCA1', 'BRCA2')) {
         
-        if (use_api == T) {
+        if (use_api == TRUE) {
             qq = brca_query(gene, start - 1, end + 1)
         } else {
             chrom = ifelse(gene == 'BRCA1', 17, 13)
-            qq = filter(brca_exchange_variants, Chr == chrom, start - 1, end + 1) %>% 
-                transpose()
+            qq = dplyr::filter(brca_exchange_variants, Chr == chrom, start - 1, end + 1) %>% 
+                purrr::transpose()
         }
         
         if (length(qq) > 0) {
-            map_dfr(qq, ~set_names(., c('gene',
-                                        'chrom',
-                                        'start_position',
-                                        'end_position',
-                                        'reference_allele',
-                                        'alternate_allele',
-                                        'id',
-                                        'pathogenicity'))) %>% 
-                mutate(
+            purrr::map_dfr(qq, ~purrr::set_names(., c('gene',
+                                                      'chrom',
+                                                      'start_position',
+                                                      'end_position',
+                                                      'reference_allele',
+                                                      'alternate_allele',
+                                                      'id',
+                                                      'pathogenicity'))) %>% 
+                dplyr::mutate(
                     start_position = as.numeric(start_position),
                     end_position = as.numeric(end_position),
-                    variant_type = case_when(
-                        str_sub(reference_allele, 1, 1) == str_sub(alternate_allele, 1, 1) &
+                    variant_type = dplyr::case_when(
+                        stringr::str_sub(reference_allele, 1, 1) == stringr::str_sub(alternate_allele, 1, 1) &
                             nchar(reference_allele) < nchar(alternate_allele) ~ 'insertion',
-                        str_sub(reference_allele, 1, 1) == str_sub(alternate_allele, 1, 1) &
+                        stringr::str_sub(reference_allele, 1, 1) == stringr::str_sub(alternate_allele, 1, 1) &
                             nchar(reference_allele) > nchar(alternate_allele) ~ 'deletion',
                         TRUE ~ 'snv'),
-                    reference_allele = case_when(
+                    reference_allele = dplyr::case_when(
                         variant_type == 'insertion' ~ '-',
-                        variant_type == 'deletion' ~ str_replace(reference_allele, '(^[A-Z]{1})', ''),
+                        variant_type == 'deletion' ~ stringr::str_replace(reference_allele, '(^[A-Z]{1})', ''),
                         TRUE ~ reference_allele
                     ),
-                    alternate_allele = case_when(
-                        variant_type == 'insertion' ~ str_replace(alternate_allele, '(^[A-Z]{1})', ''), 
+                    alternate_allele = dplyr::case_when(
+                        variant_type == 'insertion' ~ stringr::str_replace(alternate_allele, '(^[A-Z]{1})', ''), 
                         variant_type == 'deletion' ~ '-',
                         TRUE ~ alternate_allele
                     ),
-                    end_position = case_when(
+                    end_position = dplyr::case_when(
                         variant_type == 'snv' ~ start_position,
                         variant_type == 'insertion' ~ end_position + 1,
                         variant_type == 'deletion' ~ end_position),
-                    start_position = case_when(
+                    start_position = dplyr::case_when(
                         variant_type == 'deletion' ~ start_position + 1,
                         TRUE ~ start_position)
                 ) %>% 
-                filter(start_position == start,
-                       end_position == end,
-                       reference_allele == ref,
-                       alternate_allele == alt) %>% 
-                mutate(brca_exchange_enigma = str_trim(str_extract(
+                dplyr::filter(start_position == start,
+                              end_position == end,
+                              reference_allele == ref,
+                              alternate_allele == alt) %>% 
+                dplyr::mutate(brca_exchange_enigma = stringr::str_trim(str_extract(
                     pathogenicity, '[A-Za-z\\,\\ ]+(?=\\(ENIGMA\\))'), 'both'),
-                    brca_exchange_clinvar = str_trim(str_extract(
+                    brca_exchange_clinvar = stringr::str_trim(str_extract(
                         pathogenicity, '[A-Za-z\\,\\ \\_]+(?=\\(ClinVar\\))'), 'both')) %>%
-                select(brca_exchange_id = id, brca_exchange_enigma, brca_exchange_clinvar)
+                dplyr::select(brca_exchange_id = id, brca_exchange_enigma, brca_exchange_clinvar)
         } else {
-            tibble(brca_exchange_id = NA)
+            tibble::tibble(brca_exchange_id = NA)
         }
     }
 }
@@ -97,12 +99,12 @@ query_brca_exchange = function(gene, start, end, ref, alt, use_api = FALSE) {
 #' @rdname brca_exchange_annotate_maf
 brca_annotate_maf = function(maf, use_api = FALSE) {
     
-    map_chr_possibly = possibly(map_chr, NA_character_)
+    map_chr_possibly = purrr::possibly(purrr::map_chr, NA_character_)
     
-    mutate(maf, annot = pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2, use_api),
-                             query_brca_exchange)) %>%
-        mutate(brca_exchange_id = map_chr_possibly(annot, 'brca_exchange_id'),
-               brca_exchange_enigma = map_chr_possibly(annot, 'brca_exchange_enigma'),
-               brca_exchange_clinvar = map_chr_possibly(annot, 'brca_exchange_clinvar')) %>%
-        select(-annot)
+    dplyr::mutate(maf, annot = purrr::pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2, use_api),
+                                           query_brca_exchange)) %>%
+        dplyr::mutate(brca_exchange_id = map_chr_possibly(annot, 'brca_exchange_id'),
+                      brca_exchange_enigma = map_chr_possibly(annot, 'brca_exchange_enigma'),
+                      brca_exchange_clinvar = map_chr_possibly(annot, 'brca_exchange_clinvar')) %>%
+        dplyr::select(-annot)
 }
