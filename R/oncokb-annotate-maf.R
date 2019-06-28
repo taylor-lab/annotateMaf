@@ -18,12 +18,13 @@
 #' @source \url{github.com/oncokb/oncokb-annotator}
 #'
 #' @import purrr
-#' @importFrom dplyr case_when bind_cols
+#' @importFrom dplyr case_when bind_cols left_join select
 #' @importFrom future plan
 #' @importFrom furrr future_pmap_dfr
 #' @importFrom plyr revalue
 #' @importFrom httr modify_url GET content
 #' @importFrom stringr str_replace str_extract
+#' @importFrom tibble tibble add_column
 #' 
 #' @examples
 #' query_oncokb('PIK3CA', 'H1047R', 'missense')
@@ -66,42 +67,42 @@ query_oncokb = function(gene, protein_change, variant_type, start, end, cancer_t
   if (variant_type != '') {
 
     base_url = 'http://oncokb.org/legacy-api/indicator.json?source=cbioportal'
-    oncokb_version = content(GET(base_url))[['dataVersion']]
+    oncokb_version = httr::content(httr::GET(base_url))[['dataVersion']]
     tag = paste(gene, protein_change, cancer_type, sep = '-')
 
     if (!exists('cached_entries')) cached_entries <<- vector(mode = 'list')
 
     if (!tag %in% names(cached_entries)) {
-        query_url = modify_url(base_url, query = list(
+        query_url = httr::modify_url(base_url, query = list(
             hugoSymbol = gene,
             alteration = protein_change,
             consequence = variant_type,
             tumorType = cancer_type
         ))
 
-        oncokb_response = GET(query_url)
-        oncokb_response = content(oncokb_response)
-
+        oncokb_response = httr::GET(query_url)
+        oncokb_response = httr::content(oncokb_response)
+        
         cached_entries[[tag]] = oncokb_response
     } else {
         oncokb_response = cached_entries[[tag]]
     }
 
-    drugs = map(oncokb_response$treatments, 'drugs') %>%
-        map(., function(x) paste(unlist(x))) %>%
-        simplify %>%
-        unique
+    drugs = purrr::map(oncokb_response$treatments, 'drugs') %>%
+        purrr::map(., function(x) paste(unlist(x))) %>%
+        purrr::simplify() %>%
+        unique()
 
-    tibble(oncogenic = as.character(oncokb_response$oncogenic),
-           oncokb_level = ifelse(is.null(oncokb_response$highestSensitiveLevel), '',
-                                 oncokb_response$highestSensitiveLevel),
-           oncokb_resistance_level = ifelse(is.null(oncokb_response$highestResistanceLevel), '',
-                                            oncokb_response$highestResistanceLevel),
-           oncokb_drugs = ifelse(length(drugs) == 0, '',
-                                 paste(unlist(unique(drugs)), collapse = ',')),
-           oncokb_version = oncokb_version)
+    tibble::tibble(oncogenic = as.character(oncokb_response$oncogenic),
+                   oncokb_level = ifelse(is.null(oncokb_response$highestSensitiveLevel), '',
+                                         oncokb_response$highestSensitiveLevel),
+                   oncokb_resistance_level = ifelse(is.null(oncokb_response$highestResistanceLevel), '',
+                                                    oncokb_response$highestResistanceLevel),
+                   oncokb_drugs = ifelse(length(drugs) == 0, '',
+                                         paste(unlist(unique(drugs)), collapse = ',')),
+                   oncokb_version = oncokb_version)
   } else {
-      tibble(oncogenic = '')
+      tibble::tibble(oncogenic = '')
   }
 }
 
@@ -113,9 +114,9 @@ oncokb_annotate_maf = function(maf, cancer_types = NULL, parallelize = TRUE)
         message('No cancer types(s) specified, defaults to CANCER')
         maf$cancer_type = 'CANCER'
     } else if (is.character(cancer_types)) {
-        maf = add_column(maf, cancer_type = cancer_types)
+        maf = tibble::add_column(maf, cancer_type = cancer_types)
     } else {
-        maf = left_join(maf, cancer_types, by = 'Tumor_Sample_Barcode')
+        maf = dplyr::left_join(maf, cancer_types, by = 'Tumor_Sample_Barcode')
     }
 
     oncokb_cols = mutate(maf,
@@ -125,19 +126,19 @@ oncokb_annotate_maf = function(maf, cancer_types = NULL, parallelize = TRUE)
                (Variant_Classification %in% coding_mutations & HGVSp_Short != '') | # this is necessary to avoid poorly annotated but likely FP indel calls from Pindel
                (Variant_Classification %in% c('Splice_Site', 'Splice_Region') & HGVSc != '') |
                 Hugo_Symbol == 'TERT' ~
-                   revalue(Variant_Classification, consequence_map, warn_missing = F),
+                   plyr::revalue(Variant_Classification, consequence_map, warn_missing = F),
              TRUE ~ ''),
            start = stringr::str_extract(Protein_position, '^[0-9]+(?=\\/|\\-)'),
            end = stringr::str_extract(Protein_position, '(?<=-)[0-9]+(?=/)')
            ) %>%
-        select(gene, protein_change, variant_type, start, end, cancer_type)
+        dplyr::select(gene, protein_change, variant_type, start, end, cancer_type)
     
-    if (parallelize) {
-        oncokb_cols = future_pmap_dfr(oncokb_cols, query_oncokb)
+    if (parallelize == TRUE) {
+        oncokb_cols = furrr::future_pmap_dfr(oncokb_cols, query_oncokb)
     } else {
-        oncokb_cols = pmap_dfr(oncokb_cols, query_oncokb)
+        oncokb_cols = purrr::pmap_dfr(oncokb_cols, query_oncokb)
     }
-        
-    bind_cols(maf, oncokb_cols)
+    
+    dplyr::bind_cols(maf, oncokb_cols)
 
 }
