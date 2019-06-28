@@ -1,6 +1,6 @@
 Package: annotateMaf
 Title: Functional Annotation of Variants in a MAF File
-Version: 1.0
+Version: 1.0.1
 Authors@R: 
     person(given = "Philip",
            family = "Jonsson",
