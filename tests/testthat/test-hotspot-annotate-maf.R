@@ -1,6 +1,7 @@
 context('hotspot_annotate_maf')
 suppressPackageStartupMessages({
-    library(tidyverse)
+    library(dplyr)
+    library(tribble)
 })
 
 test_that('returns valid output', {

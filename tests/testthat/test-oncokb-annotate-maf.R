@@ -1,6 +1,7 @@
 context('oncokb_annotate_maf')
 suppressPackageStartupMessages({
-    library(tidyverse)
+    library(dplyr)
+    library(tribble)
 })
 # test_that('warns if missing columns in input', {
 #     
