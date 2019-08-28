@@ -21,6 +21,8 @@ library(annotateMaf)
 
 Run the functions simply with your MAF (as a `data.table`, not the file path) as the input.
 
+hotspot_annotate_maf requires a VEP-annotated MAF file.
+
 ``` r
 # Note that the BRCA Exchange database is geared towards germline variants but by default the variant allele in a MAF is called Tumor_Seq_Allele2
 annotated_maf = brca_exchange_annotate_maf(input_maf)
