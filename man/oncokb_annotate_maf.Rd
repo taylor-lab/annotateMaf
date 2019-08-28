@@ -31,6 +31,8 @@ oncokb_annotate_maf(maf, cancer_types = NULL, parallelize = TRUE)
 \item{maf}{Input MAF.}
 
 \item{cancer_types}{Data frame with samples mapped to cancer type for accurate levels of actionability.}
+
+\item{parallelize}{Boolean indicating whether to parallelize annotation, using \code{future} backend.}
 }
 \value{
 Annotated MAF with columns indicating functionality of mutation and levels of actionability.

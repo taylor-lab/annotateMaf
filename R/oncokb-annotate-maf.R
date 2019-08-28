@@ -11,6 +11,7 @@
 #' @param start Genomic start position of variant.
 #' @param end Genomic end position of variant.
 #' @param cancer_type Oncotree code for cancer type. Can be left blank. 
+#' @param parallelize Boolean indicating whether to parallelize annotation, using \code{future} backend.
 #'
 #' @return Annotated MAF with columns indicating functionality of mutation and levels of actionability.
 #'
@@ -58,7 +59,7 @@ coding_mutations = c('Frame_Shift_Del',
                      'Translation_Start_Site')
 
 # Allow parallellization
-future::plan(future::multiprocess)
+future::plan(future::multisession)
 
 #' @export
 #' @rdname oncokb_annotate_maf
