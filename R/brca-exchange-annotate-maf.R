@@ -40,7 +40,7 @@ query_brca_exchange = function(gene, start, end, ref, alt, use_api = FALSE) {
             qq = brca_query(gene, start - 1, end + 1)
         } else {
             chrom = ifelse(gene == 'BRCA1', 17, 13)
-            qq = dplyr::filter(brca_exchange_variants, Chr == chrom, start - 1, end + 1) %>% 
+            qq = dplyr::filter(brca_exchange_variants, Chr == chrom, pyhgvs_Hg37_Start > start - 2, pyhgvs_Hg37_End < end + 2) %>%
                 purrr::transpose()
         }
         
@@ -103,8 +103,8 @@ brca_annotate_maf = function(maf, use_api = FALSE) {
     
     dplyr::mutate(maf, annot = purrr::pmap(list(Hugo_Symbol, Start_Position, End_Position, Reference_Allele, Tumor_Seq_Allele2, use_api),
                                            query_brca_exchange)) %>%
-        dplyr::mutate(brca_exchange_id = map_chr_possibly(annot, 'brca_exchange_id'),
-                      brca_exchange_enigma = map_chr_possibly(annot, 'brca_exchange_enigma'),
-                      brca_exchange_clinvar = map_chr_possibly(annot, 'brca_exchange_clinvar')) %>%
+        dplyr::mutate(brca_exchange_id = map_chr_possibly(annot, 'brca_exchange_id', .default = NA),
+                      brca_exchange_enigma = map_chr_possibly(annot, 'brca_exchange_enigma', .default = NA),
+                      brca_exchange_clinvar = map_chr_possibly(annot, 'brca_exchange_clinvar', .default = NA)) %>%
         dplyr::select(-annot)
 }
