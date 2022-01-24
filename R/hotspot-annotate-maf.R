@@ -18,14 +18,14 @@
 #' @name hotspot_annotate_maf
 NULL
 
-load_gene_annotation = function() {
-    read_lines('http://oncokb.org/api/v1/genes') %>%
+load_gene_annotation = function(oncokbbaseurl = 'https://legacy.oncokb.org/api/v1/genes') {
+    read_lines(oncokbbaseurl) %>%
         fromJSON()
 }
 
 #' @export
 #' @rdname hotspot_annotate_maf
-hotspot_annotate_maf = function(maf, hotspot_tbl = NULL) {
+hotspot_annotate_maf = function(maf, oncokbbaseurl = 'https://legacy.oncokb.org/api/v1/genes', hotspot_tbl = NULL) {
     
     if (!inherits(maf, 'data.frame')) stop('Input MAF must be a data frame, preferrable VEP annotated')
     if (!is.null(hotspot_tbl)) {
@@ -40,7 +40,7 @@ hotspot_annotate_maf = function(maf, hotspot_tbl = NULL) {
     if (any(grepl('hotspot', tolower(names(maf))))) message('Hotspot columns in MAF might be overwritten, check names')
     
     # Read default hotspot lists if user does not supply
-    gene_annotation = load_gene_annotation()
+    gene_annotation = load_gene_annotation(oncokbbaseurl)
 
     # Function that deals with indel hotspots
     tag_indel_hotspot = function(gene, hgvsp_short, start, end, indel_length) {
