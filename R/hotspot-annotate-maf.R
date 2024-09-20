@@ -18,14 +18,14 @@
 #' @name hotspot_annotate_maf
 NULL
 
-load_gene_annotation = function(oncokbbaseurl = 'https://legacy.oncokb.org/api/v1/genes') {
+load_gene_annotation = function(oncokbbaseurl = ' https://data-legacy.oncokb.aws.mskcc.org/api/v1/genes') {
     read_lines(oncokbbaseurl) %>%
         fromJSON()
 }
 
 #' @export
 #' @rdname hotspot_annotate_maf
-hotspot_annotate_maf = function(maf, oncokbbaseurl = 'https://legacy.oncokb.org/api/v1/genes', hotspot_tbl = NULL) {
+hotspot_annotate_maf = function(maf, oncokbbaseurl = ' https://data-legacy.oncokb.aws.mskcc.org/api/v1/genes', hotspot_tbl = NULL) {
     
     if (!inherits(maf, 'data.frame')) stop('Input MAF must be a data frame, preferrable VEP annotated')
     if (!is.null(hotspot_tbl)) {
