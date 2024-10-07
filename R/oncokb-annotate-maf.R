@@ -67,7 +67,7 @@ query_oncokb = function(gene, protein_change, variant_type, start, end, cancer_t
 
   if (variant_type != '') {
 
-    base_url = 'http://oncokb.org/legacy-api/indicator.json?source=cbioportal'
+    base_url = 'https://data-legacy.oncokb.aws.mskcc.org/legacy-api/indicator.json?source=cbioportal'
     oncokb_version = httr::content(httr::GET(base_url))[['dataVersion']]
     tag = paste(gene, protein_change, cancer_type, sep = '-')
 
