@@ -89,10 +89,10 @@ hotspot_annotate_maf = function(maf, oncokbbaseurl = 'https://legacy.oncokb.org/
 
     maf = dplyr::mutate(maf,
                         residue = stringr::str_extract(Protein_position, '^[0-9]+(?=/|-)'),
-                        start_residue = residue,
+                        start_residue = as.double(residue),
                         end_residue = stringr::str_extract(Protein_position, '(?<=-)[0-9]+(?=/)'),
                         end_residue = ifelse(is.na(end_residue) & Variant_Classification %like% 'In_Frame',
-                                             start_residue, end_residue)) %>%
+                                             as.double(start_residue), as.double(end_residue))) %>%
         tidyr::replace_na(list(start_residue = 0, end_residue = 0)) %>%
         dplyr::rowwise() %>%
         dplyr::mutate(
